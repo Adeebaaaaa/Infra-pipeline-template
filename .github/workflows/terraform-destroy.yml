@@ -1,0 +1,62 @@
+name: Terraform Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment to destroy"
+        required: true
+        type: choice
+        options:
+          - dev
+          - beta
+          - prod
+
+      commit_sha:
+        description: "Commit SHA that was last applied"
+        required: true
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+
+    container:
+      image: miradeeba766/iac-ci:1.14.6
+
+    env:
+      ENV: ${{ inputs.environment }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: us-east-1
+
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit_sha }}
+          fetch-depth: 0
+
+      - name: Show destroy context
+        run: |
+          echo "===================================="
+          echo "Terraform DESTROY"
+          echo "Environment : ${ENV}"
+          echo "Commit SHA  : ${{ inputs.commit_sha }}"
+          echo "Triggered by: ${GITHUB_ACTOR}"
+          echo "===================================="
+
+      - name: Terraform Init
+        run: |
+          chmod +x init.sh
+          ./init.sh "$ENV"
+
+      - name: Terraform Destroy Plan
+        run: |
+          terraform plan \
+            -destroy \
+            -var-file="environments/${ENV}.tfvars" \
+            -out="env_out-${ENV}.destroy.tfplan"
+
+      - name: Terraform Destroy Apply
+        run: |
+          terraform apply -auto-approve "env_out-${ENV}.destroy.tfplan"

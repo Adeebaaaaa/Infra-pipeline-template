@@ -1,0 +1,50 @@
+name: Terraform Import
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        required: true
+        type: choice
+        options: [dev, beta, prod]
+
+      commit_sha:
+        required: true
+
+      tf_import_address:
+        required: true
+
+      tf_import_id:
+        required: true
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+
+    container:
+      image: miradeeba766/iac-ci:1.14.6
+
+    env:
+      ENV: ${{ inputs.environment }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: us-east-1
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit_sha }}
+
+      - name: Terraform Init
+        run: |
+          chmod +x init.sh
+          ./init.sh "$ENV"
+
+      - name: Terraform Import
+        run: |
+          terraform import \
+            "${{ inputs.tf_import_address }}" \
+            "${{ inputs.tf_import_id }}"
+
+      - name: Show imported state
+        run: terraform state show "${{ inputs.tf_import_address }}"

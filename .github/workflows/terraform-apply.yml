@@ -1,0 +1,68 @@
+name: Terraform Apply
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        required: true
+        type: choice
+        options: [dev, beta, prod]
+
+      commit_sha:
+        required: true
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    container:
+      image: miradeeba766/iac-ci:1.14.6
+
+    env:
+      ENV: ${{ inputs.environment }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: us-east-1
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit_sha }}
+
+      # Promotion gates
+      - name: Verify dev promotion
+        if: ${{ env.ENV == 'beta' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: promoted-dev-${{ inputs.commit_sha }}
+
+      - name: Verify beta promotion
+        if: ${{ env.ENV == 'prod' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: promoted-beta-${{ inputs.commit_sha }}
+
+      - name: Download Terraform plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-${ENV}-${{ inputs.commit_sha }}
+
+      - name: Terraform Init
+        run: |
+          chmod +x init.sh
+          ./init.sh "$ENV"
+
+      - name: Terraform Apply
+        run: terraform apply -input=false env_out-${ENV}.tfplan
+
+      # Promotion marker
+      - name: Mark promotion
+        if: ${{ env.ENV != 'prod' }}
+        run: |
+          echo "$ENV promoted" > promoted-${ENV}.txt
+
+      - name: Upload promotion marker
+        if: ${{ env.ENV != 'prod' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: promoted-${ENV}-${{ inputs.commit_sha }}
+          path: promoted-${ENV}.txt
