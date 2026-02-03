@@ -97,8 +97,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: miradeeba766/iac-ci:1.14.6
-    environment:
-      name: ${{ inputs.env }}
     continue-on-error: true
 
     steps:
