@@ -21,7 +21,9 @@ env:
   IAC_TOOL: terraform
   TF_VERSION: "1.14.2"
   IAC_OUTPUT_DIR: iac_outputs
-
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: us-east-1
 jobs:
 
 # ========================= PRE-MERGE =========================
@@ -62,15 +64,17 @@ jobs:
       image: miradeeba766/iac-ci:1.14.6
     steps:
       - uses: actions/checkout@v4
-
-      - name: Terraform plan
+      - name: Terraform aws export
         run: |
           export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:?}"
           export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:?}"
           export AWS_REGION="${AWS_REGION:-us-east-1}"
-          chmod +x init.sh
+      - name: Terraform init
+        run: |
+           chmod +x init.sh
            bash init.sh "$ENV"
-
+      - name: Terraform plan
+        run: |
           terraform plan \
             -input=false \
             -var-file="environments/${ENV}.tfvars" \
