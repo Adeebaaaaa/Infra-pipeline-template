@@ -282,7 +282,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: outputs-${{ env.ENV }}
-          path: env-${ENV}_outputs.json
+          path: env-${{ env.ENV }}_outputs.json
           retention-days: 90
 
       # -------- Promotion marker (commit-SHA locked via GitHub Release) --------
