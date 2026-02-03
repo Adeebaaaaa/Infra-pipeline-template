@@ -1,5 +1,4 @@
 name: Reusable Terraform Infra Pipeline
-
 on:
   workflow_call:
     inputs:
@@ -193,7 +192,7 @@ jobs:
   import:
     name: Terraform Import
     needs: drift
-    if: needs.drift.result == 'failure'
+    if: always() && needs.drift.result == 'failure'
     environment: ${{ inputs.env }}
     runs-on: ubuntu-latest
     container:
