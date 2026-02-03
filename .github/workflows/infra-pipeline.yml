@@ -87,9 +87,8 @@ jobs:
         with:
           name: plan-${{ env.ENV }}
           path: |
-            env-${ENV}.tfplan
-            env-${ENV}.json
-          retention-days: 7
+            env-${{ env.ENV }}.tfplan
+            env-${{ env.ENV }}.json
 
 # ============================ DRIFT ===========================
   drift:
@@ -229,6 +228,8 @@ jobs:
     name: Terraform Apply
     needs:
       - plan
+      - drift
+    if: always()
     runs-on: ubuntu-latest
     container:
       image: miradeeba766/iac-ci:1.14.6
