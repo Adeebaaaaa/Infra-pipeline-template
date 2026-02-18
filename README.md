@@ -191,6 +191,55 @@ This ensures:
       beta-<commit-sha>
 
 
+## PROD (iac-prod.yml)
+
+- Verifies BETA promotion exists
+- Calls reusable workflow
+- Deploys to production
+
+
+---
+
+#  Destroy
+
+Terraform destroy:
+
+- Only runs via `workflow_dispatch`
+- Requires environment approval
+- Is intentionally restricted for safety
+
+
+---
+
+# Typical Deployment Flow
+
+1. Run DEV
+2. Validate infrastructure
+3. DEV promotion release created
+4. Run BETA (same commit)
+5. Validate again
+6. BETA promotion release created
+7. Run PROD (same commit)
+
+All environments use the **same commit SHA**.
+
+
+---
+
+#  What This Pipeline Protects You From
+
+- Infrastructure drift
+-  Manual AWS console changes
+-  Deploying different commits per environment
+-  Skipping environment promotion
+
+
+
+---
+
+
+
+
 
 
 
