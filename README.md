@@ -71,7 +71,7 @@ It contains the complete CI/CD logic for:
 
 #  Pipeline Stages Explained
 
-## 1️⃣ Pre-Merge Checks
+##  Pre-Merge Checks
 
 Runs quality and security checks:
 terraform fmt
@@ -85,7 +85,7 @@ If any of these fail, the pipeline stops.
 
 ---
 
-## 2️⃣ Terraform Plan
+##  Terraform Plan
 
 - Initializes Terraform
 - Generates:
@@ -98,7 +98,7 @@ This ensures the same plan is used later during apply.
 
 ---
 
-## 3️⃣ Drift Detection (Intent-Aware)
+##  Drift Detection (Intent-Aware)
 
 This stage checks whether infrastructure was changed outside Terraform.
 
@@ -122,7 +122,7 @@ This prevents manual AWS console changes from going unnoticed.
 
 ---
 
-## 4️⃣ Terraform Import (Drift Recovery)
+##  Terraform Import (Drift Recovery)
 
 If drift is detected:
 
@@ -137,7 +137,7 @@ After import, Terraform re-plans to ensure alignment.
 
 ---
 
-## 5️⃣ Terraform Apply
+##  Terraform Apply
 
 - Applies the previously generated plan
 - Saves Terraform outputs
