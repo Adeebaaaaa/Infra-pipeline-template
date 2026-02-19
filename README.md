@@ -228,7 +228,7 @@ All environments use the **same commit SHA**.
 
 #  What This Pipeline Protects You From
 
-- Infrastructure drift
+-  Infrastructure drift
 -  Manual AWS console changes
 -  Deploying different commits per environment
 -  Skipping environment promotion

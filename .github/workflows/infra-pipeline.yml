@@ -34,7 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Terraform fmt 
+      - name: Terraform FMT 
         run: 
           terraform fmt -recursive -check
 
